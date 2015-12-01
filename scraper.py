@@ -101,12 +101,22 @@ soup = BeautifulSoup(html, "lxml")
 
 title_divs = soup.find_all('div', 'col-sm-6')
 for title_div in title_divs:
+
+
+
+
     blocks = title_div.find_all('ul', 'dropdown-menu')
     for block in blocks:
+
         links = block.find_all('a', href=True)[1]
         url = block.find_all('a', href=True)[1]['href']
-        print url
+        if "icon-exclamation-sign" in str(title_div):
+            try:
+                url = "http://data.gov.uk" + block.find_all('a', href=True)[2]['href']
+            except:
+                pass
         if 'csv' in url:
+
             title = links.find_previous('div', 'inner2').text.replace('/', ' ').strip()
             csvYr = title[5:10].strip()
             csvMth = title[3:5].strip()
