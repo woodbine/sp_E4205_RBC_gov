@@ -9,7 +9,6 @@ import urllib2
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-
 #### FUNCTIONS 1.0
 
 def validateFilename(filename):
@@ -57,7 +56,6 @@ def validateURL(url):
         print ("Error validating URL.")
         return False, False
 
-
 def validate(filename, file_url):
     validFilename = validateFilename(filename)
     validURL, validFiletype = validateURL(file_url)
@@ -86,46 +84,31 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E4205_RBC_gov"
-url = "http://data.gov.uk/dataset/council-spending-over-500"
+url = "https://data.gov.uk/dataset/council-spending-over-500"
 errors = 0
 data = []
-
 
 #### READ HTML 1.0
 
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html, "lxml")
+soup = BeautifulSoup(html, 'lxml')
 
 
 #### SCRAPE DATA
 
-title_divs = soup.find_all('div', 'col-sm-6')
-for title_div in title_divs:
 
-
-
-
-    blocks = title_div.find_all('ul', 'dropdown-menu')
-    for block in blocks:
-
-        links = block.find_all('a', href=True)[1]
-        url = block.find_all('a', href=True)[1]['href']
-        if "icon-exclamation-sign" in str(title_div):
-            try:
-                url = "http://data.gov.uk" + block.find_all('a', href=True)[2]['href']
-            except:
-                pass
-        if 'csv' in url:
-
-            title = links.find_previous('div', 'inner2').text.replace('/', ' ').strip()
-            csvYr = title[5:10].strip()
-            csvMth = title[3:5].strip()
-            if len(csvMth)<=1:
-                csvMth = '0' + csvMth
-            csvMth = convert_mth_strings(csvMth.upper())
-            data.append([csvYr, csvMth, url])
-
-
+blocks = soup.find_all('div', 'dataset-resource-text')
+for block in blocks:
+    link = block.find_all('a')[-1]
+    url = link['href']
+    csvfile =block.find('span', 'inner-cell').text.split()[0]
+    if 'Council' not in csvfile and '.csv' in url:
+        csvMth = csvfile.split('/')[1]
+        if len(csvMth) == 1:
+            csvMth = '0'+csvMth
+        csvYr = csvfile.split('/')[2]
+        csvMth = convert_mth_strings(csvMth.upper())
+        data.append([csvYr, csvMth, url])
 
 #### STORE DATA 1.0
 
